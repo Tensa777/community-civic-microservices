@@ -9,24 +9,37 @@ document.getElementById("complaintForm")
         const description = document.getElementById("description").value;
         const location = document.getElementById("location").value;
 
-        const response = await fetch(API_URL + "/complaints", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                citizen_id: citizenId,
-                description: description,
-                location: location
-            })
-        });
+        try {
+            const response = await fetch(API_URL + "/complaints", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    citizen_id: citizenId,
+                    description: description,
+                    location: location
+                })
+            });
 
-        const data = await response.json();
+            const data = await response.json();
 
-        document.getElementById("result").innerHTML =
-            `<h3>Complaint Registered</h3>
-            Complaint ID: ${data.complaint_id}<br>
-            Status: ${data.status}`;
+            if (response.ok) {
+                document.getElementById("result").innerHTML =
+                    `<h3>Complaint Registered</h3>
+                    Complaint ID: ${data.complaint_id}<br>
+                    Status: ${data.status}`;
+            } else {
+                document.getElementById("result").innerHTML =
+                    `<h3>Error</h3>
+                    ${data.error}`;
+            }
+
+        } catch (error) {
+            document.getElementById("result").innerHTML =
+                `<h3>Error</h3>
+                Unable to connect to Complaint Service`;
+        }
     });
 
 
@@ -34,25 +47,30 @@ async function findComplaint() {
 
     const id = document.getElementById("searchComplaintId").value;
 
-    const response = await fetch(
-        API_URL + "/complaints/" + id
-    );
+    try {
+        const response = await fetch(
+            API_URL + "/complaints/" + id
+        );
 
-    const data = await response.json();
+        const data = await response.json();
 
-    if (response.ok) {
+        if (response.ok) {
+            document.getElementById("complaintDetails").innerHTML =
+                `<h3>Complaint Details</h3>
+                Complaint ID: ${data.complaint_id}<br>
+                Citizen ID: ${data.citizen_id}<br>
+                Issue: ${data.description}<br>
+                Location: ${data.location}<br>
+                Status: ${data.status}`;
+        } else {
+            document.getElementById("complaintDetails").innerHTML =
+                `<h3>Error</h3>
+                ${data.error}`;
+        }
 
+    } catch (error) {
         document.getElementById("complaintDetails").innerHTML =
-            `<h3>Complaint Details</h3>
-            Complaint ID: ${data.complaint_id}<br>
-            Citizen ID: ${data.citizen_id}<br>
-            Issue: ${data.description}<br>
-            Location: ${data.location}<br>
-            Status: ${data.status}`;
-
-    } else {
-
-        document.getElementById("complaintDetails").innerHTML =
-            data.error;
+            `<h3>Error</h3>
+            Unable to connect to Complaint Service`;
     }
 }
